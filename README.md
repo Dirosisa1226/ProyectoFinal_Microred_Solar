@@ -16,7 +16,14 @@ Sistema web (Flask + PostgreSQL) para gestionar una microred solar comunitaria: 
 
 ## Versión en línea
 
-El sistema también está desplegado en la nube con Render (`render.yaml` y `despliegue/iniciar_render.py`).
+**https://microred-solar.onrender.com**
+
+| Rol | Correo | Contraseña |
+|-----|--------|------------|
+| Administrador | `admin@microred.co` | `Admin2026*` |
+| Operador | `operador@microred.co` | `Operador2026*` |
+
+Desplegado en Render (`render.yaml` y `despliegue/iniciar_render.py`).
 En el plan gratuito, la primera visita después de un rato sin uso puede tardar cerca de un minuto en cargar.
 
 ## Cómo ejecutarlo (Windows)
