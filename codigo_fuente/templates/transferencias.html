@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Transferencias{% endblock %}
+{% block contenido %}
+<h1>Transferencias de energía</h1>
+<p class="descripcion">Un hogar con créditos le vende energía a otro. Cada transferencia se ejecuta como una sola transacción: o se aplica completa o no se aplica.</p>
+
+<div class="trabajo">
+    <form class="formulario" method="post" action="{{ url_for('registrar_transferencia') }}">
+        <h2>Nueva transferencia</h2>
+        {% if precio is not none %}
+        <div class="precio-vigente">Tarifa vigente: <strong>$ {{ precio|num(2) }}</strong> por kWh</div>
+        {% else %}
+        <div class="mensaje error">No hay tarifa activa. El administrador debe registrar una.</div>
+        {% endif %}
+        <label for="id_vendedor">Hogar que vende</label>
+        <select id="id_vendedor" name="id_vendedor" required>
+            <option value="">Seleccione…</option>
+            {% for h in hogares %}
+            <option value="{{ h.id_hogar }}">{{ h.nombre_titular }} ({{ h.creditos_kwh|num(3) }} kWh disponibles)</option>
+            {% endfor %}
+        </select>
+        <label for="id_comprador">Hogar que compra</label>
+        <select id="id_comprador" name="id_comprador" required>
+            <option value="">Seleccione…</option>
+            {% for h in hogares %}
+            <option value="{{ h.id_hogar }}">{{ h.nombre_titular }}</option>
+            {% endfor %}
+        </select>
+        <label for="kwh">kWh a transferir</label>
+        <input id="kwh" name="kwh" type="number" required min="0.001" max="100000" step="0.001">
+        <div class="acciones-form">
+            <button class="boton" type="submit">Registrar transferencia</button>
+        </div>
+    </form>
+
+    <div class="tabla-contenedor">
+        {% if filas %}
+        <table>
+            <thead><tr>
+                <th>#</th><th>Fecha</th><th>Vende</th><th>Compra</th>
+                <th class="numero">kWh</th><th class="numero">Precio kWh</th><th class="numero">Total</th><th>Registró</th>
+            </tr></thead>
+            <tbody>
+            {% for t in filas %}
+            <tr>
+                <td>{{ t.id_transaccion }}</td>
+                <td class="nombre">{{ t.fecha.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td class="nombre">{{ t.vendedor }}</td>
+                <td class="nombre">{{ t.comprador }}</td>
+                <td class="numero">{{ t.kwh|num(3) }}</td>
+                <td class="numero">$ {{ t.precio_kwh|num(2) }}</td>
+                <td class="numero">$ {{ t.total|num(2) }}</td>
+                <td>{{ t.registrado_por or '—' }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="vacio">Todavía no hay transferencias. Registre la primera con el formulario.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

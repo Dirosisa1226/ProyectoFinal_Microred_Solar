@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}{% endblock %} | Microrred Solar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+<body>
+{% set actual = request.endpoint or '' %}
+<header class="barra">
+    <div class="barra-interna">
+        <a class="marca" href="{{ url_for('hogares') }}"><span class="marca-sol"></span>Microrred Solar</a>
+        <nav class="menu">
+            <a href="{{ url_for('hogares') }}" class="{{ 'activo' if 'hogar' in actual }}">Hogares</a>
+            <a href="{{ url_for('medidores') }}" class="{{ 'activo' if 'medidor' in actual }}">Medidores</a>
+            <a href="{{ url_for('lecturas') }}" class="{{ 'activo' if 'lectura' in actual }}">Lecturas</a>
+            <a href="{{ url_for('transferencias') }}" class="{{ 'activo' if 'transferencia' in actual }}">Transferencias</a>
+            {% if es_admin %}
+            <span class="separador"></span>
+            <a href="{{ url_for('tarifas') }}" class="{{ 'activo' if 'tarifa' in actual }}">Tarifas</a>
+            <a href="{{ url_for('usuarios') }}" class="{{ 'activo' if 'usuario' in actual }}">Usuarios</a>
+            <a href="{{ url_for('auditoria') }}" class="{{ 'activo' if 'auditoria' in actual }}">Auditoría</a>
+            {% endif %}
+        </nav>
+        <div class="sesion">
+            <span>{{ session.nombre }} <span class="rol">{{ session.rol|lower }}</span></span>
+            <a href="{{ url_for('salir') }}">Salir</a>
+        </div>
+    </div>
+</header>
+<main>
+    {% for categoria, texto in get_flashed_messages(with_categories=true) %}
+    <div class="mensaje {{ categoria }}" role="status">{{ texto }}</div>
+    {% endfor %}
+    {% block contenido %}{% endblock %}
+</main>
+<script>
+    // Confirmación antes de eliminar (el texto viaja escapado en un atributo data-)
+    document.addEventListener('submit', function (e) {
+        var mensaje = e.target.dataset.confirmar;
+        if (mensaje && !confirm(mensaje)) { e.preventDefault(); }
+    });
+</script>
+</body>
+</html>

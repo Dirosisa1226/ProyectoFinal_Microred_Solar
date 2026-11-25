@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Tarifas{% endblock %}
+{% block contenido %}
+<h1>Tarifas</h1>
+<p class="descripcion">Precio interno del kWh en la microrred. Al registrar una tarifa nueva, la anterior queda inactiva en la misma transacción.</p>
+
+<div class="trabajo">
+    <form class="formulario" method="post" action="{{ url_for('nueva_tarifa') }}">
+        <h2>Nueva tarifa</h2>
+        <label for="precio_kwh">Precio por kWh (COP)</label>
+        <input id="precio_kwh" name="precio_kwh" type="number" required min="1" max="100000" step="0.01">
+        <div class="acciones-form">
+            <button class="boton" type="submit">Activar tarifa</button>
+        </div>
+    </form>
+
+    <div class="tabla-contenedor">
+        <table>
+            <thead><tr><th>#</th><th class="numero">Precio kWh</th><th>Vigente desde</th><th>Estado</th></tr></thead>
+            <tbody>
+            {% for t in filas %}
+            <tr>
+                <td>{{ t.id_tarifa }}</td>
+                <td class="numero">$ {{ t.precio_kwh|num(2) }}</td>
+                <td>{{ t.vigente_desde.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{% if t.activa %}<span class="creditos positivo">Activa</span>{% else %}Inactiva{% endif %}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

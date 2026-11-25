@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titulo %}Auditoría{% endblock %}
+{% block contenido %}
+<h1>Auditoría</h1>
+<p class="descripcion">Registro automático de cada inserción, cambio y eliminación, generado por triggers en la base de datos. Es de solo lectura.</p>
+
+<form class="buscador" method="get" action="{{ url_for('auditoria') }}">
+    <select name="tabla" aria-label="Filtrar por tabla">
+        <option value="">Todas las tablas</option>
+        {% for t in tablas %}
+        <option value="{{ t }}" {{ 'selected' if tabla == t }}>{{ t }}</option>
+        {% endfor %}
+    </select>
+    <button class="boton" type="submit">Filtrar</button>
+</form>
+<div class="tabla-contenedor">
+    {% if filas %}
+    <table>
+        <thead><tr>
+            <th>#</th><th>Fecha</th><th>Tabla</th><th>Operación</th><th>Registro</th>
+            <th>Usuario app</th><th>Usuario BD</th><th>Datos</th>
+        </tr></thead>
+        <tbody>
+        {% for a in filas %}
+        <tr>
+            <td>{{ a.id_auditoria }}</td>
+            <td>{{ a.fecha.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            <td>{{ a.tabla }}</td>
+            <td>{{ a.operacion }}</td>
+            <td class="numero">{{ a.id_registro }}</td>
+            <td>{{ a.usuario_app or '—' }}</td>
+            <td>{{ a.usuario_bd }}</td>
+            <td class="detalle">
+                {% for campo, antes, despues in a.detalle %}
+                <span><b>{{ campo }}</b>: {% if a.operacion == 'UPDATE' %}{{ antes }} → {{ despues }}{% else %}{{ despues }}{% endif %}</span>
+                {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="vacio">No hay registros de auditoría para este filtro.</p>
+    {% endif %}
+</div>
+{% endblock %}

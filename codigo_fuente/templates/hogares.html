@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block titulo %}Hogares{% endblock %}
+{% block contenido %}
+<h1>Hogares</h1>
+<p class="descripcion">Viviendas del barrio conectadas a la microrred. Los créditos de energía se calculan solos a partir de las lecturas y las transferencias.</p>
+
+<div class="trabajo">
+    <form class="formulario {{ 'edicion' if edicion }}" method="post" action="{{ url_for('guardar_hogar') }}">
+        <h2>{{ 'Editar hogar #' ~ edicion.id_hogar if edicion else 'Registrar hogar' }}</h2>
+        <input type="hidden" name="id_hogar" value="{{ edicion.id_hogar if edicion }}">
+        <label for="documento">Documento del titular</label>
+        <input id="documento" name="documento" required pattern="[0-9]{6,12}" maxlength="12"
+               inputmode="numeric" title="Entre 6 y 12 dígitos" value="{{ edicion.documento if edicion }}">
+        <label for="nombre_titular">Nombre del titular</label>
+        <input id="nombre_titular" name="nombre_titular" required maxlength="100" value="{{ edicion.nombre_titular if edicion }}">
+        <label for="direccion">Dirección</label>
+        <input id="direccion" name="direccion" required maxlength="120" value="{{ edicion.direccion if edicion }}">
+        <label for="barrio">Barrio</label>
+        <input id="barrio" name="barrio" required maxlength="60" value="{{ edicion.barrio if edicion }}">
+        <label for="telefono">Teléfono</label>
+        <input id="telefono" name="telefono" required pattern="[0-9]{7,10}" maxlength="10"
+               inputmode="numeric" title="Entre 7 y 10 dígitos" value="{{ edicion.telefono if edicion }}">
+        <div class="acciones-form">
+            <button class="boton" type="submit">{{ 'Guardar cambios' if edicion else 'Registrar hogar' }}</button>
+            {% if edicion %}<a class="enlace" href="{{ url_for('hogares') }}">Cancelar</a>{% endif %}
+        </div>
+    </form>
+
+    <section>
+        <form class="buscador" method="get" action="{{ url_for('hogares') }}">
+            <input name="q" value="{{ q }}" maxlength="60" placeholder="Buscar por titular, documento o barrio" aria-label="Buscar">
+            <button class="boton" type="submit">Buscar</button>
+            {% if q %}<a class="enlace" href="{{ url_for('hogares') }}" style="align-self:center">Ver todos</a>{% endif %}
+        </form>
+        <div class="tabla-contenedor">
+            {% if filas %}
+            <table>
+                <thead><tr>
+                    <th>#</th><th>Titular</th><th>Dirección</th><th class="numero">Medidores</th>
+                    <th class="numero">Generado / consumido kWh</th>
+                    <th class="numero">Vendido / comprado kWh</th><th class="numero">Créditos kWh</th><th></th>
+                </tr></thead>
+                <tbody>
+                {% for h in filas %}
+                <tr>
+                    <td>{{ h.id_hogar }}</td>
+                    <td class="nombre">{{ h.nombre_titular }}<span class="secundario">CC {{ h.documento }}</span><span class="secundario">Tel. {{ h.telefono }}</span></td>
+                    <td class="nombre">{{ h.direccion }}<span class="secundario">{{ h.barrio }}</span></td>
+                    <td class="numero">{{ h.medidores }}</td>
+                    <td class="numero">{{ h.total_generado|num(1) }} / {{ h.total_consumido|num(1) }}</td>
+                    <td class="numero">{{ h.kwh_vendidos|num(1) }} / {{ h.kwh_comprados|num(1) }}</td>
+                    <td class="numero"><span class="creditos {{ 'positivo' if h.creditos_kwh > 0 }}">{{ h.creditos_kwh|num(3) }}</span></td>
+                    <td class="acciones">
+                        <a class="enlace" href="{{ url_for('hogares', editar=h.id_hogar) }}">Editar</a>
+                        {% if es_admin %}
+                        <form class="en-linea" method="post" action="{{ url_for('eliminar_hogar', id_hogar=h.id_hogar) }}"
+                              data-confirmar="¿Eliminar el hogar de {{ h.nombre_titular }}?">
+                            <button class="mini peligro" type="submit">Eliminar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="vacio">No hay hogares que coincidan. Registre uno con el formulario.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

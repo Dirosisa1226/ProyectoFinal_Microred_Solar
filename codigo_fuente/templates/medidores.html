@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block titulo %}Medidores{% endblock %}
+{% block contenido %}
+<h1>Medidores</h1>
+<p class="descripcion">Medidores bidireccionales de cada hogar. Un medidor inactivo no puede registrar lecturas.</p>
+
+<div class="trabajo">
+    <form class="formulario {{ 'edicion' if edicion }}" method="post" action="{{ url_for('guardar_medidor') }}">
+        <h2>{{ 'Editar medidor #' ~ edicion.id_medidor if edicion else 'Registrar medidor' }}</h2>
+        <input type="hidden" name="id_medidor" value="{{ edicion.id_medidor if edicion }}">
+        <label for="id_hogar">Hogar</label>
+        <select id="id_hogar" name="id_hogar" required>
+            <option value="">Seleccione…</option>
+            {% for h in hogares %}
+            <option value="{{ h.id_hogar }}" {{ 'selected' if edicion and edicion.id_hogar == h.id_hogar }}>{{ h.nombre_titular }}</option>
+            {% endfor %}
+        </select>
+        <label for="serial">Serial</label>
+        <input id="serial" name="serial" required pattern="[A-Z0-9\-]{4,30}" maxlength="30"
+               title="Mayúsculas, números y guiones" value="{{ edicion.serial if edicion }}" placeholder="MED-TMZ-007">
+        <label for="capacidad_kw">Capacidad del panel (kW)</label>
+        <input id="capacidad_kw" name="capacidad_kw" type="number" required min="0.1" max="100" step="0.01"
+               value="{{ edicion.capacidad_kw if edicion }}">
+        <label for="estado">Estado</label>
+        <select id="estado" name="estado" required>
+            {% for e in ['ACTIVO', 'INACTIVO'] %}
+            <option value="{{ e }}" {{ 'selected' if edicion and edicion.estado == e }}>{{ e|capitalize }}</option>
+            {% endfor %}
+        </select>
+        <label for="fecha_instalacion">Fecha de instalación</label>
+        <input id="fecha_instalacion" name="fecha_instalacion" type="date" required max="{{ hoy }}"
+               value="{{ edicion.fecha_instalacion if edicion else hoy }}">
+        <div class="acciones-form">
+            <button class="boton" type="submit">{{ 'Guardar cambios' if edicion else 'Registrar medidor' }}</button>
+            {% if edicion %}<a class="enlace" href="{{ url_for('medidores') }}">Cancelar</a>{% endif %}
+        </div>
+    </form>
+
+    <div class="tabla-contenedor">
+        {% if filas %}
+        <table>
+            <thead><tr>
+                <th>#</th><th>Serial</th><th>Hogar</th><th class="numero">Capacidad kW</th>
+                <th>Estado</th><th>Instalación</th><th class="numero">Lecturas</th><th></th>
+            </tr></thead>
+            <tbody>
+            {% for m in filas %}
+            <tr>
+                <td>{{ m.id_medidor }}</td>
+                <td>{{ m.serial }}</td>
+                <td>{{ m.nombre_titular }}</td>
+                <td class="numero">{{ m.capacidad_kw|num(2) }}</td>
+                <td class="{{ 'estado-inactivo' if m.estado == 'INACTIVO' }}">{{ m.estado|capitalize }}</td>
+                <td>{{ m.fecha_instalacion }}</td>
+                <td class="numero"><a class="enlace" href="{{ url_for('lecturas', medidor=m.id_medidor) }}">{{ m.lecturas }}</a></td>
+                <td class="acciones">
+                    <a class="enlace" href="{{ url_for('medidores', editar=m.id_medidor) }}">Editar</a>
+                    {% if es_admin %}
+                    <form class="en-linea" method="post" action="{{ url_for('eliminar_medidor', id_medidor=m.id_medidor) }}"
+                          data-confirmar="¿Eliminar el medidor {{ m.serial }}?">
+                        <button class="mini peligro" type="submit">Eliminar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="vacio">Aún no hay medidores. Registre el primero con el formulario.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

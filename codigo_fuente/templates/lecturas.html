@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block titulo %}Lecturas{% endblock %}
+{% block contenido %}
+<h1>Lecturas diarias</h1>
+<p class="descripcion">Energía generada y consumida por día. El excedente (generado menos consumido) se suma a los créditos del hogar.</p>
+
+<div class="trabajo">
+    <form class="formulario {{ 'edicion' if edicion }}" method="post" action="{{ url_for('guardar_lectura') }}">
+        <h2>{{ 'Editar lectura #' ~ edicion.id_lectura if edicion else 'Registrar lectura' }}</h2>
+        <input type="hidden" name="id_lectura" value="{{ edicion.id_lectura if edicion }}">
+        <label for="id_medidor">Medidor</label>
+        <select id="id_medidor" name="id_medidor" required>
+            <option value="">Seleccione…</option>
+            {% for m in medidores %}
+            <option value="{{ m.id_medidor }}" {{ 'selected' if (edicion and edicion.id_medidor == m.id_medidor) or (not edicion and filtro == m.id_medidor) }}>
+                {{ m.serial }} ({{ m.nombre_titular }}){{ ' — inactivo' if m.estado == 'INACTIVO' }}
+            </option>
+            {% endfor %}
+        </select>
+        <label for="fecha">Fecha</label>
+        <input id="fecha" name="fecha" type="date" required max="{{ hoy }}" value="{{ edicion.fecha if edicion else hoy }}">
+        <label for="kwh_generado">kWh generados</label>
+        <input id="kwh_generado" name="kwh_generado" type="number" required min="0" max="2400" step="0.001"
+               value="{{ edicion.kwh_generado if edicion }}">
+        <label for="kwh_consumido">kWh consumidos</label>
+        <input id="kwh_consumido" name="kwh_consumido" type="number" required min="0" max="2400" step="0.001"
+               value="{{ edicion.kwh_consumido if edicion }}">
+        <p class="ayuda">La base de datos rechaza lecturas futuras, de medidores inactivos o que superen la capacidad del panel en 24 horas.</p>
+        <div class="acciones-form">
+            <button class="boton" type="submit">{{ 'Guardar cambios' if edicion else 'Registrar lectura' }}</button>
+            {% if edicion %}<a class="enlace" href="{{ url_for('lecturas') }}">Cancelar</a>{% endif %}
+        </div>
+    </form>
+
+    <section>
+        <form class="buscador" method="get" action="{{ url_for('lecturas') }}">
+            <select name="medidor" aria-label="Filtrar por medidor">
+                <option value="">Todos los medidores</option>
+                {% for m in medidores %}
+                <option value="{{ m.id_medidor }}" {{ 'selected' if filtro == m.id_medidor }}>{{ m.serial }} ({{ m.nombre_titular }})</option>
+                {% endfor %}
+            </select>
+            <button class="boton" type="submit">Filtrar</button>
+        </form>
+        <div class="tabla-contenedor">
+            {% if filas %}
+            <table>
+                <thead><tr>
+                    <th>#</th><th>Fecha</th><th>Medidor</th>
+                    <th class="numero">Generado kWh</th><th class="numero">Consumido kWh</th><th class="numero">Excedente kWh</th><th></th>
+                </tr></thead>
+                <tbody>
+                {% for l in filas %}
+                <tr>
+                    <td>{{ l.id_lectura }}</td>
+                    <td>{{ l.fecha }}</td>
+                    <td class="nombre">{{ l.serial }}<span class="secundario">{{ l.nombre_titular }}</span></td>
+                    <td class="numero">{{ l.kwh_generado|num(3) }}</td>
+                    <td class="numero">{{ l.kwh_consumido|num(3) }}</td>
+                    <td class="numero"><span class="creditos {{ 'positivo' if l.excedente > 0 }}">{{ l.excedente|num(3) }}</span></td>
+                    <td class="acciones">
+                        <a class="enlace" href="{{ url_for('lecturas', editar=l.id_lectura) }}">Editar</a>
+                        {% if es_admin %}
+                        <form class="en-linea" method="post" action="{{ url_for('eliminar_lectura', id_lectura=l.id_lectura) }}"
+                              data-confirmar="¿Eliminar la lectura del {{ l.fecha }} del medidor {{ l.serial }}?">
+                            <button class="mini peligro" type="submit">Eliminar</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="vacio">No hay lecturas para este filtro.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

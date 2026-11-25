@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<h1>Usuarios</h1>
+<p class="descripcion">Personas que pueden ingresar a la plataforma. Las contraseñas se guardan cifradas con hash bcrypt; nadie puede verlas.</p>
+
+<div class="trabajo">
+    <form class="formulario {{ 'edicion' if edicion }}" method="post" action="{{ url_for('guardar_usuario') }}">
+        <h2>{{ 'Editar usuario #' ~ edicion.id_usuario if edicion else 'Crear usuario' }}</h2>
+        <input type="hidden" name="id_usuario" value="{{ edicion.id_usuario if edicion }}">
+        <label for="nombre">Nombre</label>
+        <input id="nombre" name="nombre" required maxlength="100" value="{{ edicion.nombre if edicion }}">
+        {% if edicion %}
+        <label for="correo">Correo</label>
+        <input id="correo" value="{{ edicion.correo }}" disabled>
+        {% else %}
+        <label for="correo">Correo</label>
+        <input id="correo" name="correo" type="email" required maxlength="120">
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" required minlength="8" maxlength="72" autocomplete="new-password">
+        <p class="ayuda">Mínimo 8 caracteres, con letras y números.</p>
+        {% endif %}
+        <label for="rol">Rol</label>
+        <select id="rol" name="rol" required>
+            <option value="OPERADOR" {{ 'selected' if edicion and edicion.rol == 'OPERADOR' }}>Operador</option>
+            <option value="ADMIN" {{ 'selected' if edicion and edicion.rol == 'ADMIN' }}>Administrador</option>
+        </select>
+        {% if edicion %}
+        <label class="casilla"><input type="checkbox" name="activo" {{ 'checked' if edicion.activo }}> Usuario activo</label>
+        {% endif %}
+        <div class="acciones-form">
+            <button class="boton" type="submit">{{ 'Guardar cambios' if edicion else 'Crear usuario' }}</button>
+            {% if edicion %}<a class="enlace" href="{{ url_for('usuarios') }}">Cancelar</a>{% endif %}
+        </div>
+    </form>
+
+    <div class="tabla-contenedor">
+        <table>
+            <thead><tr><th>#</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Registro</th><th></th></tr></thead>
+            <tbody>
+            {% for u in filas %}
+            <tr>
+                <td>{{ u.id_usuario }}</td>
+                <td>{{ u.nombre }}</td>
+                <td>{{ u.correo }}</td>
+                <td>{{ 'Administrador' if u.rol == 'ADMIN' else 'Operador' }}</td>
+                <td class="{{ 'estado-inactivo' if not u.activo }}">{{ 'Activo' if u.activo else 'Inactivo' }}</td>
+                <td>{{ u.fecha_registro.strftime('%Y-%m-%d') }}</td>
+                <td class="acciones">
+                    <a class="enlace" href="{{ url_for('usuarios', editar=u.id_usuario) }}">Editar</a>
+                    {% if u.id_usuario != session.id_usuario %}
+                    <form class="en-linea" method="post" action="{{ url_for('eliminar_usuario', id_usuario=u.id_usuario) }}"
+                          data-confirmar="¿Eliminar al usuario {{ u.correo }}?">
+                        <button class="mini peligro" type="submit">Eliminar</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
