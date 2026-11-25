@@ -14,6 +14,11 @@ Sistema web (Flask + PostgreSQL) para gestionar una microred solar comunitaria: 
 | `1_instalar_base_datos.bat` | Crea la base de datos `microred` en PostgreSQL local |
 | `2_iniciar_sistema.bat` | Instala dependencias e inicia el sistema en http://127.0.0.1:5000 |
 
+## Versión en línea
+
+El sistema también está desplegado en la nube con Render (`render.yaml` y `despliegue/iniciar_render.py`).
+En el plan gratuito, la primera visita después de un rato sin uso puede tardar cerca de un minuto en cargar.
+
 ## Cómo ejecutarlo (Windows)
 
 1. Instalar PostgreSQL 16+ y Python 3.11+.

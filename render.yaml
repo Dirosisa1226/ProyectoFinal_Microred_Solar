@@ -1,0 +1,26 @@
+# Configuración de despliegue en Render (https://render.com)
+# Crea la base de datos PostgreSQL y el servicio web del sistema.
+databases:
+  - name: microred-db
+    plan: free
+    databaseName: microred
+    postgresMajorVersion: "16"
+
+services:
+  - type: web
+    name: microred-solar
+    runtime: python
+    plan: free
+    buildCommand: pip install -r codigo_fuente/requirements.txt gunicorn==23.0.0
+    startCommand: python despliegue/iniciar_render.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: microred-db
+          property: connectionString
+      - key: APP_DB_PASSWORD
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
