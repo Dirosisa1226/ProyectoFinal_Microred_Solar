@@ -23,6 +23,8 @@ Sistema web (Flask + PostgreSQL) para gestionar una microred solar comunitaria: 
 | Administrador | `admin@microred.co` | `Admin2026*` |
 | Operador | `operador@microred.co` | `Operador2026*` |
 
+**Video de demostración (3 min 53 s, con subtítulos):** [Video_Demostracion_Microred_Solar.mp4](Video_Demostracion_Microred_Solar.mp4)
+
 Desplegado en Render (`render.yaml` y `despliegue/iniciar_render.py`).
 En el plan gratuito, la primera visita después de un rato sin uso puede tardar cerca de un minuto en cargar.
 
